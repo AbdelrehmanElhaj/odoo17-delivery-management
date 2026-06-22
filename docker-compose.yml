@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:15
+    container_name: dms-db
+    environment:
+      - POSTGRES_USER=odoo17
+      - POSTGRES_PASSWORD=odoo17
+      - POSTGRES_DB=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - dms-db-data:/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo17"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal
+
+  web:
+    build: .
+    image: odoo17-delivery:latest
+    container_name: dms-odoo
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8069"
+    environment:
+      - HOST=db
+      - USER=odoo17
+      - PASSWORD=odoo17
+      # nginx-proxy routing
+      - VIRTUAL_HOST=dms.hdrelhaj.com
+      - VIRTUAL_PORT=8069
+      # Let's Encrypt
+      - LETSENCRYPT_HOST=dms.hdrelhaj.com
+      - LETSENCRYPT_EMAIL=a.elhaj@proptech.sa
+    volumes:
+      - dms-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+      - ./logs:/var/log/odoo
+    restart: unless-stopped
+    networks:
+      - internal
+      - web
+
+volumes:
+  dms-web-data:
+    driver: local
+  dms-db-data:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge
+  web:
+    external: true
