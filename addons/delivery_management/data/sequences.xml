@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_delivery_order" model="ir.sequence">
+            <field name="name">Delivery Order</field>
+            <field name="code">delivery.order</field>
+            <field name="prefix">DO/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_delivery_trip" model="ir.sequence">
+            <field name="name">Delivery Trip</field>
+            <field name="code">delivery.trip</field>
+            <field name="prefix">TR/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

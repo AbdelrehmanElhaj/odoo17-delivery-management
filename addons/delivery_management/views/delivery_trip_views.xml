@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST -->
+    <record id="view_delivery_trip_list" model="ir.ui.view">
+        <field name="name">delivery.trip.list</field>
+        <field name="model">delivery.trip</field>
+        <field name="arch" type="xml">
+            <tree string="Trips"
+                  decoration-success="state == 'done'"
+                  decoration-info="state == 'in_progress'"
+                  decoration-warning="state == 'dispatched'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="scheduled_date"/>
+                <field name="order_count" string="Orders"/>
+                <field name="stop_count" string="Stops"/>
+                <field name="pending_stop_count" string="Pending" optional="show"/>
+                <field name="actual_start" optional="show"/>
+                <field name="actual_end" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'in_progress'"
+                       decoration-warning="state == 'dispatched'"
+                       decoration-danger="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- KANBAN -->
+    <record id="view_delivery_trip_kanban" model="ir.ui.view">
+        <field name="name">delivery.trip.kanban</field>
+        <field name="model">delivery.trip</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="scheduled_date"/>
+                <field name="order_count"/>
+                <field name="stop_count"/>
+                <field name="pending_stop_count"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><i class="fa fa-truck"/> <field name="vehicle_id"/></div>
+                                    <div><i class="fa fa-user"/> <field name="driver_id"/></div>
+                                    <div invisible="not scheduled_date">
+                                        <i class="fa fa-calendar"/> <field name="scheduled_date" widget="date"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left text-muted">
+                                        <span><field name="order_count"/> orders ·
+                                              <field name="pending_stop_count"/>/<field name="stop_count"/> stops left</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_delivery_trip_form" model="ir.ui.view">
+        <field name="name">delivery.trip.form</field>
+        <field name="model">delivery.trip</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_dispatch" string="Dispatch" type="object"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_start" string="Start Trip" type="object"
+                            class="btn-primary" invisible="state != 'dispatched'"/>
+                    <button name="action_done" string="Complete Trip" type="object"
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            class="btn-secondary"
+                            invisible="state in ['done', 'cancelled']"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ['cancelled', 'dispatched']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,dispatched,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_view_orders"
+                                class="oe_stat_button" icon="fa-list-alt"
+                                invisible="order_count == 0">
+                            <field name="order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <div class="oe_stat_button" icon="fa-map-pin"
+                             invisible="stop_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="pending_stop_count"/>/<field name="stop_count"/>
+                                </span>
+                                <span class="o_stat_text">Stops left</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Assignment">
+                            <field name="vehicle_id"/>
+                            <field name="driver_id"/>
+                            <field name="scheduled_date"/>
+                        </group>
+                        <group string="Actuals">
+                            <field name="actual_start" readonly="1"/>
+                            <field name="actual_end" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Stops" name="stops">
+                            <field name="stop_ids"
+                                   context="{'default_trip_id': id}"
+                                   widget="one2many">
+                                <tree editable="bottom"
+                                      decoration-success="status == 'done'"
+                                      decoration-danger="status == 'failed'"
+                                      decoration-warning="status == 'arrived'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="partner_id"/>
+                                    <field name="order_id"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'done'"
+                                           decoration-danger="status == 'failed'"
+                                           decoration-warning="status == 'arrived'"
+                                           decoration-info="status == 'pending'"/>
+                                    <field name="eta"/>
+                                    <field name="actual_arrival" optional="show"/>
+                                    <field name="photo_count" string="Photos" optional="show"/>
+                                    <field name="notes" optional="hide"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Orders" name="orders">
+                            <field name="order_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="mode" widget="badge"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'done'"
+                                           decoration-danger="state == 'failed'"
+                                           decoration-info="state == 'in_progress'"/>
+                                    <field name="scheduled_date"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" nolabel="1" placeholder="Trip notes…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_delivery_trip_search" model="ir.ui.view">
+        <field name="name">delivery.trip.search</field>
+        <field name="model">delivery.trip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="dispatched" string="Dispatched" domain="[('state','=','dispatched')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
+                <filter name="done" string="Done" domain="[('state','=','done')]"/>
+                <separator/>
+                <filter name="today" string="Today"
+                        domain="[('scheduled_date','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('scheduled_date','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_driver" string="Driver" context="{'group_by': 'driver_id'}"/>
+                    <filter name="group_vehicle" string="Vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_date" string="Scheduled Date" context="{'group_by': 'scheduled_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_delivery_trip" model="ir.actions.act_window">
+        <field name="name">Trips</field>
+        <field name="res_model">delivery.trip</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_delivery_trip_search"/>
+    </record>
+
+</odoo>

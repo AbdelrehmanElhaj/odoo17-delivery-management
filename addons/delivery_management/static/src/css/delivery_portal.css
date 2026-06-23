@@ -1,0 +1,187 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Delivery Management — Portal CSS
+   Covers: customer tracking page + driver stop-update page
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Tracking page ─────────────────────────────────────────────── */
+
+.dms-tracking-title {
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.dms-map-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.dms-map-placeholder {
+    background: #f8f9fa;
+    min-height: 350px;
+}
+
+.dms-map-offline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 350px;
+    padding: 2rem;
+    text-align: center;
+}
+
+#dms-map {
+    width: 100%;
+    height: 350px;
+}
+
+.dms-eta-time {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+    line-height: 1.2;
+}
+
+.dms-gps-badge {
+    font-size: .75rem;
+    transition: background-color .3s;
+}
+
+.dms-gps-badge.live {
+    background-color: #198754 !important;
+}
+
+.dms-milestones .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: .75rem 1rem;
+    font-size: .95rem;
+    color: #6c757d;
+}
+
+.dms-milestones .dms-milestone-done {
+    color: #212529;
+}
+
+/* ── Driver portal ─────────────────────────────────────────────── */
+
+.dms-driver-trip-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.dms-driver-stop {
+    padding: 1rem;
+    transition: background-color .2s;
+}
+
+.dms-driver-stop.dms-stop-done {
+    background-color: #f0fff4;
+}
+
+.dms-driver-stop.dms-stop-failed {
+    background-color: #fff5f5;
+    opacity: .85;
+}
+
+.dms-stop-seq {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dms-stop-done .dms-stop-seq {
+    background: #198754;
+}
+
+.dms-stop-failed .dms-stop-seq {
+    background: #dc3545;
+}
+
+.dms-stop-actions {
+    min-width: 120px;
+}
+
+.dms-stop-btn {
+    width: 100%;
+    font-size: .8rem;
+}
+
+/* Arabic RTL support */
+[dir="rtl"] .dms-stop-seq {
+    margin-left: .75rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .dms-stop-actions {
+    text-align: start;
+    margin-left: 0;
+    margin-right: .5rem;
+}
+
+/* Navigate button */
+.dms-nav-btn {
+    font-size: .75rem;
+    padding: 3px 8px;
+}
+
+/* Mobile-first adjustments */
+@media (max-width: 576px) {
+    .dms-eta-time {
+        font-size: 2rem;
+    }
+    .dms-stop-actions {
+        min-width: 100px;
+    }
+    /* Full-width action buttons on mobile for easier tapping */
+    .dms-stop-btn, .dms-nav-btn {
+        min-height: 40px;
+    }
+}
+
+/* ── Backend dashboard ─────────────────────────────────────────────── */
+
+.o_dms_dashboard {
+    background: #f4f5f7;
+}
+
+.dms-trip-row {
+    transition: background .15s;
+}
+
+.dms-trip-row:hover {
+    background: #f0f4ff;
+}
+
+/* Arabic RTL: swap icon margins */
+[dir="rtl"] .fa.me-1, [dir="rtl"] .fa.me-2 {
+    margin-right: 0 !important;
+    margin-left: .25rem;
+}
+
+[dir="rtl"] .dms-stop-seq {
+    margin-left: .75rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .dms-stop-actions {
+    text-align: start;
+    margin-left: 0;
+    margin-right: .5rem;
+}
+
+[dir="rtl"] .dms-nav-btn {
+    direction: ltr;  /* keep map deep-link URL ltr */
+}

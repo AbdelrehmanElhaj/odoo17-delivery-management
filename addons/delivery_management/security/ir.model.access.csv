@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_delivery_vehicle_manager,delivery.vehicle manager,model_delivery_vehicle,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_vehicle_driver,delivery.vehicle driver,model_delivery_vehicle,delivery_management.group_delivery_driver,1,0,0,0
+access_delivery_driver_manager,delivery.driver manager,model_delivery_driver,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_driver_driver,delivery.driver driver,model_delivery_driver,delivery_management.group_delivery_driver,1,0,0,0
+access_delivery_order_manager,delivery.order manager,model_delivery_order,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_order_driver,delivery.order driver,model_delivery_order,delivery_management.group_delivery_driver,1,1,0,0
+access_delivery_trip_manager,delivery.trip manager,model_delivery_trip,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_trip_driver,delivery.trip driver,model_delivery_trip,delivery_management.group_delivery_driver,1,1,0,0
+access_delivery_stop_manager,delivery.stop manager,model_delivery_stop,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_stop_driver,delivery.stop driver,model_delivery_stop,delivery_management.group_delivery_driver,1,1,0,0
+access_delivery_photo_manager,delivery.photo manager,model_delivery_photo,delivery_management.group_delivery_manager,1,1,1,1
+access_delivery_photo_driver,delivery.photo driver,model_delivery_photo,delivery_management.group_delivery_driver,1,1,1,0
+access_create_delivery_wizard_manager,create.delivery.wizard manager,model_create_delivery_wizard,delivery_management.group_delivery_manager,1,1,1,1

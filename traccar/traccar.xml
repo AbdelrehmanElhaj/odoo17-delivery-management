@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+<properties>
+
+    <entry key="config.default">./conf/default.xml</entry>
+
+    <entry key="database.driver">org.postgresql.Driver</entry>
+    <entry key="database.url">jdbc:postgresql://db:5432/traccar</entry>
+    <entry key="database.user">odoo17</entry>
+    <entry key="database.password">odoo17</entry>
+
+    <!-- OsmAnd HTTP protocol — used by the Traccar Client mobile app -->
+    <entry key="osmand.port">5055</entry>
+
+    <!-- Forward every position update to the FastAPI bridge (internal Docker network).
+         forward.type=json sends POST with JSON body; forward.header passes a custom header. -->
+    <entry key="forward.type">json</entry>
+    <entry key="forward.url">http://traccar-bridge:8000/webhook</entry>
+    <entry key="forward.header">X-Api-Key: change-me-in-production</entry>
+
+</properties>

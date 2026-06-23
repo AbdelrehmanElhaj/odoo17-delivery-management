@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="module_category_delivery" model="ir.module.category">
+            <field name="name">Delivery Management</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- Delivery Manager: full backend access -->
+        <record id="group_delivery_manager" model="res.groups">
+            <field name="name">Delivery Manager</field>
+            <field name="category_id" ref="module_category_delivery"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Can create, edit, and delete vehicles, drivers, trips, and orders.</field>
+        </record>
+
+        <!-- Delivery Driver: portal user who updates stops -->
+        <record id="group_delivery_driver" model="res.groups">
+            <field name="name">Delivery Driver</field>
+            <field name="category_id" ref="module_category_delivery"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="comment">Can view assigned trips and update stop status via portal.</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Top-level app menu -->
+    <menuitem id="menu_delivery_root"
+              name="Delivery"
+              sequence="50"
+              web_icon="delivery_management,static/src/img/icon.png"
+              groups="delivery_management.group_delivery_manager"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_delivery_dashboard"
+              name="Live Map"
+              parent="menu_delivery_root"
+              action="action_delivery_dashboard"
+              sequence="5"/>
+
+    <!-- Dispatch -->
+    <menuitem id="menu_delivery_dispatch"
+              name="Dispatch"
+              parent="menu_delivery_root"
+              sequence="10"/>
+
+    <menuitem id="menu_delivery_trips"
+              name="Trips"
+              parent="menu_delivery_dispatch"
+              action="action_delivery_trip"
+              sequence="10"/>
+
+    <menuitem id="menu_delivery_orders"
+              name="Delivery Orders"
+              parent="menu_delivery_dispatch"
+              action="action_delivery_order"
+              sequence="20"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_delivery_config"
+              name="Configuration"
+              parent="menu_delivery_root"
+              sequence="90"/>
+
+    <menuitem id="menu_delivery_vehicles"
+              name="Vehicles"
+              parent="menu_delivery_config"
+              action="action_delivery_vehicle"
+              sequence="10"/>
+
+    <menuitem id="menu_delivery_drivers"
+              name="Drivers"
+              parent="menu_delivery_config"
+              action="action_delivery_driver"
+              sequence="20"/>
+
+</odoo>

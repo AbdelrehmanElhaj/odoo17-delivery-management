@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST -->
+    <record id="view_delivery_order_list" model="ir.ui.view">
+        <field name="name">delivery.order.list</field>
+        <field name="model">delivery.order</field>
+        <field name="arch" type="xml">
+            <tree string="Delivery Orders"
+                  decoration-success="state == 'done'"
+                  decoration-danger="state == 'failed'"
+                  decoration-info="state == 'in_progress'"
+                  decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="mode" widget="badge"/>
+                <field name="partner_id"/>
+                <field name="sale_order_id" optional="show"/>
+                <field name="trip_id" optional="show"/>
+                <field name="scheduled_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'failed'"
+                       decoration-info="state == 'in_progress'"
+                       decoration-warning="state == 'confirmed'"/>
+                <field name="stop_count" string="Stops" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- KANBAN -->
+    <record id="view_delivery_order_kanban" model="ir.ui.view">
+        <field name="name">delivery.order.kanban</field>
+        <field name="model">delivery.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="mode"/>
+                <field name="partner_id"/>
+                <field name="scheduled_date"/>
+                <field name="trip_id"/>
+                <field name="stop_count"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                        <span class="o_kanban_record_subtitle text-muted">
+                                            <field name="mode"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><i class="fa fa-user"/> <field name="partner_id"/></div>
+                                    <div invisible="not scheduled_date">
+                                        <i class="fa fa-calendar"/> <field name="scheduled_date" widget="date"/>
+                                    </div>
+                                    <div invisible="not trip_id">
+                                        <i class="fa fa-road"/> <field name="trip_id"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left text-muted">
+                                        <span><field name="stop_count"/> stops</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_delivery_order_form" model="ir.ui.view">
+        <field name="name">delivery.order.form</field>
+        <field name="model">delivery.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_in_progress" string="Start" type="object"
+                            class="btn-primary" invisible="state != 'confirmed'"/>
+                    <button name="action_done" string="Mark Done" type="object"
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_failed" string="Mark Failed" type="object"
+                            class="btn-danger"
+                            invisible="state in ['done', 'failed', 'draft']"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ['confirmed', 'failed']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_open_tracking_url"
+                                class="oe_stat_button" icon="fa-map-marker"
+                                invisible="not tracking_token">
+                            <span class="o_stat_text">Tracking</span>
+                            <span class="o_stat_text">Link</span>
+                        </button>
+                        <button type="object" name="action_open_trip"
+                                class="oe_stat_button" icon="fa-road"
+                                invisible="not trip_id">
+                            <span class="o_stat_text">View Trip</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Order Details">
+                            <field name="mode" widget="radio" options="{'horizontal': True}"/>
+                            <field name="partner_id"/>
+                            <field name="sale_order_id"/>
+                            <field name="scheduled_date"/>
+                        </group>
+                        <group string="Dispatch">
+                            <field name="trip_id"/>
+                            <field name="next_stop_id" readonly="1"/>
+                        </group>
+                        <group string="Tracking" invisible="not tracking_token">
+                            <field name="tracking_token" readonly="1"/>
+                            <field name="portal_url" readonly="1" widget="url"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Stops" name="stops">
+                            <field name="stop_ids" context="{'default_trip_id': trip_id, 'default_order_id': id}">
+                                <tree editable="bottom"
+                                      decoration-success="status == 'done'"
+                                      decoration-danger="status == 'failed'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="partner_id"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'done'"
+                                           decoration-danger="status == 'failed'"
+                                           decoration-warning="status == 'arrived'"
+                                           decoration-info="status == 'pending'"/>
+                                    <field name="eta" optional="show"/>
+                                    <field name="actual_arrival" optional="show"/>
+                                    <field name="photo_count" string="Photos" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" nolabel="1" placeholder="Internal notes…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_delivery_order_search" model="ir.ui.view">
+        <field name="name">delivery.order.search</field>
+        <field name="model">delivery.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="sale_order_id"/>
+                <field name="trip_id"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
+                <filter name="done" string="Done" domain="[('state','=','done')]"/>
+                <filter name="failed" string="Failed" domain="[('state','=','failed')]"/>
+                <separator/>
+                <filter name="pickup" string="Pickup" domain="[('mode','=','pickup')]"/>
+                <filter name="delivery" string="Delivery" domain="[('mode','=','delivery')]"/>
+                <separator/>
+                <filter name="today" string="Scheduled Today"
+                        domain="[('scheduled_date','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('scheduled_date','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'mode'}"/>
+                    <filter name="group_trip" string="Trip" context="{'group_by': 'trip_id'}"/>
+                    <filter name="group_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_date" string="Scheduled Date" context="{'group_by': 'scheduled_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_delivery_order" model="ir.actions.act_window">
+        <field name="name">Delivery Orders</field>
+        <field name="res_model">delivery.order</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_delivery_order_search"/>
+    </record>
+
+</odoo>

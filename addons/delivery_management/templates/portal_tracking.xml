@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Public customer tracking page — no login required.
+        Route: /delivery/track/<token>
+    -->
+    <template id="portal_tracking" name="Delivery Tracking Page">
+        <t t-call="portal.frontend_layout">
+            <t t-set="additional_title"><t t-esc="order.name"/> — Track Your Delivery</t>
+
+            <div class="o_portal_wrap">
+                <div class="container py-4">
+
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col">
+                            <h2 class="dms-tracking-title">
+                                <i class="fa fa-truck me-2"/>
+                                <t t-esc="order.name"/>
+                            </h2>
+                            <p class="text-muted mb-0">
+                                <t t-if="order.mode == 'delivery'">Delivery</t>
+                                <t t-else="">Pickup</t>
+                                for <strong><t t-esc="order.partner_id.name"/></strong>
+                            </p>
+                        </div>
+                        <div class="col-auto text-end">
+                            <t t-set="state_class" t-value="{'draft': 'secondary', 'confirmed': 'warning', 'in_progress': 'info', 'done': 'success', 'failed': 'danger'}.get(order.state, 'secondary')"/>
+                            <span t-attf-class="badge bg-#{state_class} fs-6 px-3 py-2">
+                                <t t-esc="dict(order._fields['state'].selection).get(order.state, order.state)"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+
+                        <!-- Map panel -->
+                        <div class="col-lg-7">
+                            <div class="card dms-map-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fa fa-map-marker me-1"/> Live Location</span>
+                                    <span class="dms-gps-badge badge bg-secondary" id="dms-gps-status">
+                                        <i class="fa fa-circle-o"/> Awaiting signal
+                                    </span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="dms-map-container" class="dms-map-placeholder">
+                                        <t t-if="vehicle and vehicle.last_lat and vehicle.last_lng">
+                                            <!-- Map renders via tracking.js using coordinates from poll endpoint -->
+                                            <div id="dms-map" style="width:100%;height:350px;"/>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="dms-map-offline">
+                                                <i class="fa fa-map fa-3x text-muted mb-3"/>
+                                                <p class="text-muted">
+                                                    Live map will appear once the driver is en route.
+                                                </p>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-muted small" id="dms-last-updated">
+                                    <t t-if="vehicle and vehicle.gps_updated">
+                                        Last updated:
+                                        <span id="dms-updated-time"><t t-esc="vehicle.gps_updated"/></span>
+                                    </t>
+                                    <t t-else="">GPS not yet available</t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status panel -->
+                        <div class="col-lg-5">
+
+                            <!-- ETA card -->
+                            <div class="card mb-3" id="dms-eta-card" t-att-style="'display:none' if not next_stop else ''">
+                                <div class="card-body text-center">
+                                    <div class="text-muted small mb-1">Estimated Arrival</div>
+                                    <div class="dms-eta-time" id="dms-eta-display">
+                                        <t t-if="next_stop and next_stop.eta">
+                                            <t t-esc="next_stop.eta.strftime('%H:%M')"/>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </div>
+                                    <div class="text-muted small" id="dms-stops-remaining">
+                                        <t t-if="stops_remaining is not False">
+                                            <t t-esc="stops_remaining"/> stop(s) remaining
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Milestones -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fa fa-flag-checkered me-1"/> Delivery Status
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush dms-milestones">
+                                        <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state in ['draft'] else 'dms-milestone-done'}">
+                                            <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state not in ['draft'] else 'fa-circle-o text-muted')}"/>
+                                            <span>Order Confirmed</span>
+                                        </li>
+                                        <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state not in ['in_progress', 'done'] else 'dms-milestone-done'}">
+                                            <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state in ['in_progress', 'done'] else 'fa-circle-o text-muted')}"/>
+                                            <span>Driver En Route</span>
+                                        </li>
+                                        <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state != 'done' else 'dms-milestone-done'}">
+                                            <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state == 'done' else ('fa-times-circle text-danger' if order.state == 'failed' else 'fa-circle-o text-muted'))}"/>
+                                            <span>
+                                                <t t-if="order.state == 'done'">Delivered</t>
+                                                <t t-elif="order.state == 'failed'">Delivery Attempted</t>
+                                                <t t-else="">Delivered</t>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Scheduled date -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col border-end" t-if="order.scheduled_date">
+                                            <div class="text-muted small">Scheduled</div>
+                                            <strong><t t-esc="order.scheduled_date.strftime('%d %b %Y')"/></strong>
+                                            <div><t t-esc="order.scheduled_date.strftime('%H:%M')"/></div>
+                                        </div>
+                                        <div class="col" t-if="order.trip_id and order.trip_id.vehicle_id">
+                                            <div class="text-muted small">Vehicle</div>
+                                            <strong><t t-esc="order.trip_id.vehicle_id.plate"/></strong>
+                                            <div class="text-muted small"><t t-esc="order.trip_id.vehicle_id.name"/></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div><!-- /row -->
+
+                </div><!-- /container -->
+            </div>
+
+            <!-- Pass data to JS for live polling -->
+            <script type="text/javascript">
+                window.DMS = {
+                    token: "<t t-esc='order.tracking_token'/>",
+                    pollUrl: "/delivery/track/<t t-esc='order.tracking_token'/>/poll",
+                    state: "<t t-esc='order.state'/>",
+                    lat: <t t-esc="vehicle.last_lat if vehicle and vehicle.last_lat else 'null'"/>,
+                    lng: <t t-esc="vehicle.last_lng if vehicle and vehicle.last_lng else 'null'"/>,
+                };
+            </script>
+        </t>
+    </template>
+
+    <!-- 404-style page for invalid tokens -->
+    <template id="portal_tracking_not_found" name="Delivery Tracking — Not Found">
+        <t t-call="portal.frontend_layout">
+            <div class="o_portal_wrap">
+                <div class="container py-5 text-center">
+                    <i class="fa fa-question-circle fa-4x text-muted mb-3"/>
+                    <h3>Tracking link not found</h3>
+                    <p class="text-muted">
+                        This tracking link may be expired or incorrect. Please check the link in your confirmation message.
+                    </p>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

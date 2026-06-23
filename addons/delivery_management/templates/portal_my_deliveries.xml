@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Driver portal: inject "My Deliveries" into the portal home.
+    -->
+    <template id="portal_my_home_delivery" name="Portal: Delivery entry"
+              inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">My Deliveries</t>
+                <t t-set="url">/my/deliveries</t>
+                <t t-set="placeholder_count" t-value="'delivery_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!--
+        Driver portal: list of today's stops.
+        Route: /my/deliveries
+    -->
+    <template id="portal_my_deliveries" name="My Deliveries">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Deliveries</t>
+            </t>
+
+            <!-- PWA / Add-to-Home-Screen meta -->
+            <t t-set="additional_title">My Deliveries</t>
+
+            <div class="container py-3">
+            <!-- Offline banner (shown by JS when navigator.onLine is false) -->
+            <div id="dms-offline-banner" class="alert alert-warning d-none mb-3">
+                <i class="fa fa-wifi me-2"/>You are offline. Stop actions will sync when connection is restored.
+            </div>
+
+                <t t-if="not trips">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle me-2"/>
+                        No active trips assigned to you today.
+                    </div>
+                </t>
+
+                <t t-foreach="trips" t-as="trip">
+                    <div class="card mb-4 dms-driver-trip-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fa fa-road me-2"/>
+                                <t t-esc="trip.name"/>
+                            </h5>
+                            <span t-attf-class="badge bg-#{{'draft':'secondary','dispatched':'warning','in_progress':'info','done':'success'}.get(trip.state,'secondary')}">
+                                <t t-esc="dict(trip._fields['state'].selection).get(trip.state, trip.state)"/>
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <t t-foreach="trip.stop_ids" t-as="stop">
+                                    <li t-attf-class="list-group-item dms-driver-stop #{('dms-stop-done' if stop.status == 'done' else ('dms-stop-failed' if stop.status == 'failed' else ''))}">
+                                        <div class="d-flex align-items-start">
+                                            <!-- Sequence bubble -->
+                                            <div class="dms-stop-seq me-3">
+                                                <t t-esc="stop.sequence // 10"/>
+                                            </div>
+                                            <!-- Stop details -->
+                                            <div class="flex-grow-1">
+                                                <strong><t t-esc="stop.partner_id.name"/></strong>
+                                                <div class="text-muted small">
+                                                    <t t-esc="stop.partner_id.street or ''"/>
+                                                    <t t-if="stop.partner_id.city">, <t t-esc="stop.partner_id.city"/></t>
+                                                </div>
+                                                <!-- Navigate button (opens Google Maps / native maps) -->
+                                                <t t-if="stop.partner_lat and stop.partner_lng">
+                                                    <a t-attf-href="https://maps.google.com/?q=#{stop.partner_lat},#{stop.partner_lng}"
+                                                       target="_blank" rel="noopener"
+                                                       class="btn btn-sm btn-outline-primary mt-1 dms-nav-btn">
+                                                        <i class="fa fa-location-arrow me-1"/>Navigate
+                                                    </a>
+                                                </t>
+                                                <t t-elif="stop.partner_id.street">
+                                                    <a t-attf-href="https://maps.google.com/?q=#{stop.partner_id.street}+#{stop.partner_id.city or ''}"
+                                                       target="_blank" rel="noopener"
+                                                       class="btn btn-sm btn-outline-primary mt-1 dms-nav-btn">
+                                                        <i class="fa fa-location-arrow me-1"/>Navigate
+                                                    </a>
+                                                </t>
+                                                <div class="mt-1" t-if="stop.eta">
+                                                    <i class="fa fa-clock-o me-1 text-muted"/>
+                                                    <span class="small">ETA: <t t-esc="stop.eta.strftime('%H:%M')"/></span>
+                                                </div>
+                                                <div class="mt-1" t-if="stop.notes">
+                                                    <i class="fa fa-sticky-note-o me-1 text-muted"/>
+                                                    <span class="small text-muted"><t t-esc="stop.notes"/></span>
+                                                </div>
+                                            </div>
+                                            <!-- Status badge + actions -->
+                                            <div class="dms-stop-actions ms-2 text-end">
+                                                <span t-attf-class="badge bg-#{{'pending':'secondary','arrived':'warning','done':'success','failed':'danger'}.get(stop.status,'secondary')} mb-2 d-block">
+                                                    <t t-esc="dict(stop._fields['status'].selection).get(stop.status, stop.status)"/>
+                                                </span>
+                                                <t t-if="stop.status == 'pending'">
+                                                    <a t-attf-href="/my/stop/#{stop.id}/arrive"
+                                                       class="btn btn-sm btn-warning dms-stop-btn">
+                                                        <i class="fa fa-map-marker"/> Arrived
+                                                    </a>
+                                                </t>
+                                                <t t-if="stop.status == 'arrived'">
+                                                    <a t-attf-href="/my/stop/#{stop.id}/done"
+                                                       class="btn btn-sm btn-success dms-stop-btn">
+                                                        <i class="fa fa-check"/> Done
+                                                    </a>
+                                                    <a t-attf-href="/my/stop/#{stop.id}/failed"
+                                                       class="btn btn-sm btn-danger dms-stop-btn mt-1">
+                                                        <i class="fa fa-times"/> Failed
+                                                    </a>
+                                                    <!-- Photo upload form -->
+                                                    <form t-attf-action="/my/stop/#{stop.id}/photo"
+                                                          method="post" enctype="multipart/form-data"
+                                                          class="mt-2">
+                                                        <input type="hidden" name="csrf_token"
+                                                               t-att-value="request.csrf_token()"/>
+                                                        <input type="file" name="photo" accept="image/*"
+                                                               capture="environment"
+                                                               class="form-control form-control-sm mb-1"/>
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-secondary w-100">
+                                                            <i class="fa fa-camera"/> Upload Photo
+                                                        </button>
+                                                    </form>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                        <div class="card-footer text-muted small d-flex justify-content-between">
+                            <span><i class="fa fa-truck me-1"/>
+                                <t t-esc="trip.vehicle_id.name"/> (<t t-esc="trip.vehicle_id.plate"/>)
+                            </span>
+                            <span><t t-esc="trip.pending_stop_count"/>/<t t-esc="trip.stop_count"/> stops remaining</span>
+                        </div>
+                    </div>
+                </t>
+
+            </div>
+
+            <!-- Offline detection -->
+            <script>
+                (function() {
+                    var banner = document.getElementById('dms-offline-banner');
+                    function update() {
+                        if (banner) banner.classList.toggle('d-none', navigator.onLine);
+                    }
+                    update();
+                    window.addEventListener('online',  update);
+                    window.addEventListener('offline', update);
+                })();
+            </script>
+        </t>
+    </template>
+
+</odoo>

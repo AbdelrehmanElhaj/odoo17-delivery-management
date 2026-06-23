@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mail_template_delivery_tracking" model="mail.template">
+        <field name="name">Delivery: Tracking Link</field>
+        <field name="model_id" ref="delivery_management.model_delivery_order"/>
+        <field name="subject">Your delivery {{ object.name }} is confirmed</field>
+        <field name="body_html"><![CDATA[
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+
+    <div style="background: #0d6efd; padding: 24px 32px; border-radius: 8px 8px 0 0;">
+        <h2 style="color: #fff; margin: 0; font-size: 22px;">
+            🚚 Delivery Confirmed
+        </h2>
+    </div>
+
+    <div style="background: #ffffff; padding: 32px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+
+        <p style="margin-top: 0;">Dear <strong>{{ object.partner_id.name }}</strong>,</p>
+
+        <p>Your
+            <strong>{{ 'delivery' if object.mode == 'delivery' else 'pickup' }}</strong>
+            order <strong>{{ object.name }}</strong> has been confirmed.
+            {% if object.scheduled_date %}
+            It is scheduled for
+            <strong>{{ object.scheduled_date.strftime('%A, %d %B %Y at %H:%M') }}</strong>.
+            {% endif %}
+        </p>
+
+        <p>You can track your delivery status in real time using the button below:</p>
+
+        <div style="text-align: center; margin: 32px 0;">
+            <a href="{{ object.portal_url }}"
+               style="background: #0d6efd; color: #ffffff; padding: 14px 32px;
+                      border-radius: 6px; text-decoration: none; font-size: 16px;
+                      font-weight: bold; display: inline-block;">
+                📍 Track My Delivery
+            </a>
+        </div>
+
+        {% if object.trip_id and object.trip_id.vehicle_id %}
+        <div style="background: #f8f9fa; border-radius: 6px; padding: 16px; margin-bottom: 16px;">
+            <strong>Vehicle:</strong> {{ object.trip_id.vehicle_id.name }}
+            ({{ object.trip_id.vehicle_id.plate }})<br/>
+            {% if object.trip_id.driver_id %}
+            <strong>Driver:</strong> {{ object.trip_id.driver_id.name }}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <p style="color: #666; font-size: 13px;">
+            Or copy this link into your browser:<br/>
+            <a href="{{ object.portal_url }}" style="color: #0d6efd; word-break: break-all;">
+                {{ object.portal_url }}
+            </a>
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;"/>
+        <p style="color: #999; font-size: 12px; margin: 0;">
+            This message was sent automatically. Please do not reply to this email.
+        </p>
+
+    </div>
+</div>
+        ]]></field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+</odoo>

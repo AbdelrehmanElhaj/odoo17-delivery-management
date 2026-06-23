@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="delivery_management.Dashboard" owl="1">
+        <div class="o_dms_dashboard d-flex flex-column" style="height:100%; position:relative;">
+
+            <!-- Toolbar -->
+            <div class="d-flex align-items-center flex-wrap gap-2 px-3 py-2 border-bottom bg-light">
+                <i class="fa fa-truck text-primary me-1"/>
+                <strong class="me-2">Live Dispatch Map</strong>
+
+                <span class="badge bg-success">
+                    <t t-esc="state.inProgressCount"/> In Progress
+                </span>
+                <span class="badge bg-warning text-dark">
+                    <t t-esc="state.trips.filter(t => t.state === 'dispatched').length"/> Dispatched
+                </span>
+                <span class="badge bg-secondary">
+                    <t t-esc="state.vehicleCount"/> vehicle(s) with GPS
+                </span>
+
+                <span class="ms-auto text-muted small">
+                    <i class="fa fa-refresh me-1"/>Auto-refreshes every 30s
+                </span>
+            </div>
+
+            <!-- Active trips sidebar + map layout -->
+            <div class="d-flex flex-row flex-grow-1" style="min-height:0; overflow:hidden;">
+
+                <!-- Sidebar: active trips list -->
+                <div class="border-end bg-white overflow-auto"
+                     style="width:260px; min-width:220px; flex-shrink:0;">
+                    <div class="px-3 py-2 border-bottom bg-light small text-muted fw-bold">
+                        ACTIVE TRIPS
+                    </div>
+                    <t t-if="!state.trips.length">
+                        <div class="p-3 text-muted small text-center">
+                            <i class="fa fa-info-circle me-1"/>No active trips
+                        </div>
+                    </t>
+                    <t t-foreach="state.trips" t-as="trip" t-key="trip.id">
+                        <div class="px-3 py-2 border-bottom dms-trip-row">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="small"><t t-esc="trip.name"/></strong>
+                                <span t-attf-class="badge #{trip.state === 'in_progress' ? 'bg-success' : 'bg-warning text-dark'} small">
+                                    <t t-esc="trip.state === 'in_progress' ? 'Driving' : 'Dispatched'"/>
+                                </span>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="fa fa-user me-1"/><t t-esc="trip.driver"/>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="fa fa-truck me-1"/><t t-esc="trip.vehicle"/> · <t t-esc="trip.plate"/>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="fa fa-map-marker me-1"/>
+                                <t t-esc="trip.pending_stops"/>/<t t-esc="trip.stop_count"/> stops left
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Map fills remaining space -->
+                <div t-ref="map" style="flex:1; min-height:400px;"/>
+
+            </div>
+
+            <!-- Loading spinner overlay -->
+            <t t-if="!state.loaded">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                            background:rgba(255,255,255,.85);border-radius:8px;padding:20px;">
+                    <i class="fa fa-spinner fa-spin fa-2x text-primary"/>
+                </div>
+            </t>
+
+        </div>
+    </t>
+
+</templates>

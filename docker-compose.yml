@@ -47,10 +47,59 @@ services:
       - internal
       - web
 
+  traccar:
+    image: traccar/traccar:latest
+    container_name: dms-traccar
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - dms-traccar-data:/opt/traccar/data
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+    ports:
+      - "5055:5055"   # Traccar Client / OsmAnd device protocol (HTTP)
+    expose:
+      - "8082"        # Web UI — served via nginx-proxy at traccar.hdrelhaj.com
+    environment:
+      - VIRTUAL_HOST=traccar.hdrelhaj.com
+      - VIRTUAL_PORT=8082
+      - LETSENCRYPT_HOST=traccar.hdrelhaj.com
+      - LETSENCRYPT_EMAIL=a.elhaj@proptech.sa
+    networks:
+      - internal
+      - web
+
+  traccar-bridge:
+    build: ./traccar-bridge
+    container_name: dms-traccar-bridge
+    restart: unless-stopped
+    environment:
+      - ODOO_URL=http://web:8069
+      - ODOO_DB=DeliveryDemo
+      - ODOO_USER=admin
+      - ODOO_PASS=admin
+      - WEBHOOK_SECRET=change-me-in-production
+      # nginx-proxy routing (optional — expose bridge publicly for OsmAnd direct mode)
+      - VIRTUAL_HOST=gps.hdrelhaj.com
+      - VIRTUAL_PORT=8000
+      - LETSENCRYPT_HOST=gps.hdrelhaj.com
+      - LETSENCRYPT_EMAIL=a.elhaj@proptech.sa
+    expose:
+      - "8000"
+    depends_on:
+      - web
+      - traccar
+    networks:
+      - internal
+      - web
+
 volumes:
   dms-web-data:
     driver: local
   dms-db-data:
+    driver: local
+  dms-traccar-data:
     driver: local
 
 networks:

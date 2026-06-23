@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_delivery_dashboard" model="ir.actions.client">
+        <field name="name">Live Map</field>
+        <field name="tag">delivery_management.Dashboard</field>
+    </record>
+
+</odoo>
