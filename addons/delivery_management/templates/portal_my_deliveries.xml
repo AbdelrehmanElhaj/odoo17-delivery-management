@@ -29,10 +29,6 @@
 
             <t t-set="additional_title">My Deliveries</t>
 
-            <!-- Detect RTL from user lang (ar_001 = rtl) -->
-            <t t-set="user_lang" t-value="request.env.lang if hasattr(request, 'env') else 'en_US'"/>
-            <t t-set="is_rtl" t-value="request.env.lang == 'ar_001'"/>
-
             <div class="container py-3" t-att-dir="'rtl' if is_rtl else 'ltr'">
 
                 <!-- Offline banner -->
@@ -58,7 +54,8 @@
                                 <t t-esc="trip.name"/>
                             </h5>
                             <t t-set="state_labels_ar" t-value="{'draft': 'مسودة', 'dispatched': 'تم الإرسال', 'in_progress': 'قيد التنفيذ', 'done': 'مكتمل', 'cancelled': 'ملغى'}"/>
-                            <span t-attf-class="badge bg-#{{'draft':'secondary','dispatched':'warning','in_progress':'info','done':'success'}.get(trip.state,'secondary')}">
+                            <t t-set="trip_badge" t-value="{'draft':'secondary','dispatched':'warning','in_progress':'info','done':'success'}.get(trip.state,'secondary')"/>
+                            <span t-attf-class="badge bg-#{trip_badge}">
                                 <t t-if="is_rtl">
                                     <t t-esc="state_labels_ar.get(trip.state, trip.state)"/>
                                 </t>
@@ -115,7 +112,8 @@
                                             <!-- Status badge + actions -->
                                             <div class="dms-stop-actions ms-2 text-end">
                                                 <t t-set="stop_labels_ar" t-value="{'pending': 'معلق', 'arrived': 'وصل', 'done': 'مكتمل', 'failed': 'فاشل'}"/>
-                                                <span t-attf-class="badge bg-#{{'pending':'secondary','arrived':'warning','done':'success','failed':'danger'}.get(stop.status,'secondary')} mb-2 d-block">
+                                                <t t-set="stop_badge" t-value="{'pending':'secondary','arrived':'warning','done':'success','failed':'danger'}.get(stop.status,'secondary')"/>
+                                <span t-attf-class="badge bg-#{stop_badge} mb-2 d-block">
                                                     <t t-if="is_rtl">
                                                         <t t-esc="stop_labels_ar.get(stop.status, stop.status)"/>
                                                     </t>

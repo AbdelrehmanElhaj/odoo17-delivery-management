@@ -97,9 +97,16 @@ class DeliveryDriverPortal(CustomerPortal):
                 ('driver_id', '=', driver.id),
                 ('state', 'in', ['dispatched', 'in_progress']),
             ])
+        is_rtl = request.env.lang == 'ar_001'
+        current_lang = request.env['res.lang'].sudo().search(
+            [('code', '=', request.env.lang)], limit=1)
+        languages = [(current_lang.code, current_lang.name, current_lang.url_code)]
         return request.render('delivery_management.portal_my_deliveries', {
             'trips': trips,
             'driver': driver,
+            'is_rtl': is_rtl,
+            'languages': languages,
+            'lang': request.env.lang,
         })
 
     @http.route(
