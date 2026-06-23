@@ -117,9 +117,27 @@ URL: https://gps.hdrelhaj.com/osmand?id={deviceid}&lat={lat}&lon={lon}&timestamp
 
 Set the vehicle's **Traccar Device ID** field in Odoo to match `{deviceid}`.
 
-### Traccar mode
+### Traccar mode (primary GPS method)
 
-Traccar forwards positions to the bridge via webhook (configured in `traccar/traccar.xml`). Set `forward.url` to `http://traccar-bridge:8000/webhook` and `forward.header.X-Api-Key` to your `WEBHOOK_SECRET`.
+Traccar runs at `traccar.hdrelhaj.com` behind nginx (HTTPS, port 443). The device protocol is proxied through nginx — **do not use port 5055**.
+
+**Traccar Client app settings (driver's phone):**
+
+| Field | Value |
+|---|---|
+| Server URL | `https://traccar.hdrelhaj.com` |
+| Port | `443` |
+| Device Identifier | must match the vehicle's **Traccar Device ID** in Odoo |
+
+**Wiring a new driver:**
+
+1. Log in to `traccar.hdrelhaj.com` → **Devices → Add** — set a name and unique Identifier (e.g. `nuha-001`)
+2. In Odoo → **Delivery → Vehicles → [vehicle]** → set **Traccar Device ID** to the same Identifier → Save
+3. Install Traccar Client on the driver's phone and enter the settings above
+
+Traccar forwards every position to the bridge via webhook (configured in `traccar/traccar.xml`):
+- `forward.url` → `http://traccar-bridge:8000/webhook`
+- `forward.header.X-Api-Key` → your `WEBHOOK_SECRET`
 
 ## Environment Variables (traccar-bridge)
 
