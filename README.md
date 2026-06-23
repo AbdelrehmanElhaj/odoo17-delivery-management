@@ -14,21 +14,21 @@ Replaces spreadsheet-based truck dispatch with a fully integrated Odoo module. D
 ## Architecture
 
 ```
-OsmAnd App (driver phone)
+Traccar Client app (driver phone)
         │
         ▼
-gps.hdrelhaj.com   ←─── Traccar Server (dms-traccar)
-(dms-traccar-bridge)          │
-        │                     │ webhook
-        └──────────┬──────────┘
-                   │ XML-RPC
-                   ▼
-          Odoo 17 (dms-odoo)
-          delivery.vehicle.update_gps_position()
-                   │
-          ir.cron → OSRM ETA engine
-                   │
-          Customer tracking page (60s poll)
+traccar.hdrelhaj.com (dms-traccar)
+        │ webhook (X-Api-Key)
+        ▼
+gps.hdrelhaj.com (dms-traccar-bridge)
+        │ XML-RPC
+        ▼
+Odoo 17 (dms-odoo)
+delivery.vehicle.update_gps_position()
+        │
+ir.cron → OSRM ETA engine
+        │
+Customer tracking page (60s poll)
 ```
 
 ## Features
@@ -37,7 +37,7 @@ gps.hdrelhaj.com   ←─── Traccar Server (dms-traccar)
 - **Live map dashboard** — OWL component, Leaflet/OSM, 30s auto-refresh, trip sidebar
 - **Driver PWA** — Odoo portal `/my/deliveries`, Navigate button (Google Maps deep link), offline banner, Arabic RTL, photo upload
 - **Customer tracking** — public page `/delivery/track/<token>`, Leaflet map, 60s auto-poll, no login required
-- **GPS pipeline** — OsmAnd → FastAPI bridge → Odoo XML-RPC → ETA via OSRM
+- **GPS pipeline** — Traccar Client → Traccar server → FastAPI bridge → Odoo XML-RPC → ETA via OSRM
 - **Proof-of-delivery** — photo upload per stop from the driver's phone
 - **Tracking email** — sent automatically on order confirmation with a unique tracking link
 - **OSRM ETA engine** — cron-driven chained ETA calculation across all active trip stops
@@ -61,7 +61,7 @@ gps.hdrelhaj.com   ←─── Traccar Server (dms-traccar)
 | Database | PostgreSQL 15 |
 | Reverse proxy | Nginx (external Docker network `web`) |
 | GPS bridge | FastAPI (`traccar-bridge/`) |
-| GPS server | Traccar (optional, OsmAnd can hit bridge directly) |
+| GPS server | Traccar (`traccar.hdrelhaj.com`) |
 | Maps | Leaflet + OpenStreetMap |
 | ETA routing | OSRM (`router.project-osrm.org`) |
 | SSL | Let's Encrypt (via `nginx-proxy` + `acme-companion`) |
@@ -72,7 +72,7 @@ gps.hdrelhaj.com   ←─── Traccar Server (dms-traccar)
 |---|---|---|
 | `dms-db` | `postgres:15` | Odoo database |
 | `dms-odoo` | `odoo17-delivery:latest` | Odoo application |
-| `dms-traccar` | `traccar/traccar:latest` | GPS server (optional) |
+| `dms-traccar` | `traccar/traccar:latest` | GPS server |
 | `dms-traccar-bridge` | built from `./traccar-bridge` | FastAPI GPS → Odoo bridge |
 
 ## Deployment
@@ -107,17 +107,7 @@ docker compose restart web
 
 ## GPS Setup
 
-### OsmAnd (direct mode, no Traccar)
-
-Configure OsmAnd GPS Tracker with:
-
-```
-URL: https://gps.hdrelhaj.com/osmand?id={deviceid}&lat={lat}&lon={lon}&timestamp={timestamp}
-```
-
-Set the vehicle's **Traccar Device ID** field in Odoo to match `{deviceid}`.
-
-### Traccar mode (primary GPS method)
+GPS tracking uses **Traccar only**. Drivers install the Traccar Client app; positions flow to Traccar, then via webhook to the bridge, then to Odoo.
 
 Traccar runs at `traccar.hdrelhaj.com` behind nginx (HTTPS, port 443). The device protocol is proxied through nginx — **do not use port 5055**.
 
@@ -132,7 +122,7 @@ Traccar runs at `traccar.hdrelhaj.com` behind nginx (HTTPS, port 443). The devic
 **Wiring a new driver:**
 
 1. Log in to `traccar.hdrelhaj.com` → **Devices → Add** — set a name and unique Identifier (e.g. `nuha-001`)
-2. In Odoo → **Delivery → Vehicles → [vehicle]** → set **Traccar Device ID** to the same Identifier → Save
+2. In Odoo → **Delivery → Configuration → Vehicles → [vehicle]** → set **Traccar Device ID** to the same Identifier → Save
 3. Install Traccar Client on the driver's phone and enter the settings above
 
 Traccar forwards every position to the bridge via webhook (configured in `traccar/traccar.xml`):

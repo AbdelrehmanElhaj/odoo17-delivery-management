@@ -244,27 +244,21 @@ The page refreshes automatically — no need to reload manually.
 
 ## GPS Setup for New Drivers (Manager Reference)
 
-### Traccar (current setup)
+GPS tracking uses Traccar only. Follow these steps for every new driver.
 
 1. Log in to `https://traccar.hdrelhaj.com`
 2. Go to **Devices → Add**
 3. Set a **Name** (driver's name) and a unique **Identifier** (e.g. `nuha-001`)
 4. In Odoo → **Delivery → Configuration → Vehicles → [vehicle]** → set **Traccar Device ID** to the same identifier → **Save**
-5. Give the driver the Traccar Client app settings above
+5. Install the **Traccar Client** app on the driver's phone and configure:
 
-**Test the link:**
-```bash
-curl "https://gps.hdrelhaj.com/osmand?id=nuha-001&lat=24.7136&lon=46.6753&timestamp=1234567890"
-# Expected: {"status":"ok","odoo":{"success":true,"vehicle_id":...}}
-```
+| Field | Value |
+|---|---|
+| Server URL | `https://traccar.hdrelhaj.com` |
+| Port | `443` |
+| Device Identifier | same value as Step 3 |
 
-### OsmAnd (alternative, no Traccar app needed)
-
-Configure OsmAnd GPS Tracker → Online tracking:
-```
-https://gps.hdrelhaj.com/osmand?id={deviceid}&lat={0}&lon={1}&timestamp={2}
-```
-Where `{deviceid}` matches the vehicle's **Traccar Device ID** in Odoo.
+**Verify the connection** — after the driver opens Traccar Client, check the device shows as online at `traccar.hdrelhaj.com`. You can also confirm Odoo is receiving positions by checking the vehicle's GPS Last Updated field in **Delivery → Configuration → Vehicles**.
 
 ---
 

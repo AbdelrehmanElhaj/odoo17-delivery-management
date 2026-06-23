@@ -1,8 +1,8 @@
 """
 Traccar → Odoo GPS Bridge
 =========================
-Receives position updates from Traccar (via HTTP notification) or from the
-OsmAnd GPS Tracker app directly, then pushes them to Odoo via XML-RPC.
+Receives position updates from Traccar via HTTP webhook and pushes them
+to Odoo via XML-RPC.
 
 Environment variables:
   ODOO_URL        Odoo base URL (default: http://web:8069)
@@ -21,7 +21,7 @@ from fastapi import FastAPI, HTTPException, Header, Request
 log = logging.getLogger("traccar_bridge")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-app = FastAPI(title="Traccar → Odoo GPS Bridge", version="1.0.0")
+app = FastAPI(title="Traccar → Odoo GPS Bridge", version="2.0.0")
 
 ODOO_URL       = os.getenv("ODOO_URL",       "http://web:8069")
 ODOO_DB        = os.getenv("ODOO_DB",        "DeliveryDemo")
@@ -123,30 +123,3 @@ async def traccar_webhook(
         raise HTTPException(status_code=502, detail=str(exc))
 
 
-# ── OsmAnd direct endpoint ─────────────────────────────────────────────────────
-
-@app.get("/osmand")
-async def osmand(
-    id: str,
-    lat: float,
-    lon: float,
-    timestamp: Optional[int] = None,
-    speed: Optional[float] = None,
-    hdop: Optional[float] = None,
-    altitude: Optional[float] = None,
-    bearing: Optional[float] = None,
-):
-    """
-    Drivers can configure the OsmAnd GPS Tracker app to POST directly to this
-    endpoint without a Traccar server:
-      URL: http://<bridge-host>:8000/osmand?id={deviceid}&lat={lat}&lon={lon}&...
-    The device id must match delivery.vehicle.traccar_device_id in Odoo.
-    """
-    log.info("OsmAnd: id=%s lat=%.6f lng=%.6f", id, lat, lon)
-    try:
-        result = _push_gps(id, lat, lon)
-        return {"status": "ok", "odoo": result}
-    except Exception as exc:
-        log.error("Odoo push failed: %s", exc)
-        _reset_uid()
-        raise HTTPException(status_code=502, detail=str(exc))
