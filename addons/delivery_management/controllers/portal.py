@@ -14,12 +14,20 @@ class DeliveryTrackingController(http.Controller):
         auth='public',
         website=False,
     )
-    def track_delivery(self, token, **kw):
+    def track_delivery(self, token, lang=None, **kw):
+        # Default to Arabic; accept en_US as alternative
+        lang = lang if lang in ('ar_001', 'en_US') else 'ar_001'
+        # Switch the request environment language so both model field
+        # translations and QWeb template strings render in the right language
+        request.env._context = dict(request.env._context, lang=lang)
+
         order = request.env['delivery.order'].sudo().search(
             [('tracking_token', '=', token)], limit=1
         )
         if not order:
-            return request.render('delivery_management.portal_tracking_not_found', {})
+            return request.render('delivery_management.portal_tracking_not_found', {
+                'lang': lang, 'is_rtl': lang == 'ar_001',
+            })
 
         vehicle = order.trip_id.vehicle_id if order.trip_id else None
         next_stop = order.next_stop_id
@@ -30,6 +38,8 @@ class DeliveryTrackingController(http.Controller):
             'vehicle': vehicle,
             'next_stop': next_stop,
             'stops_remaining': stops_remaining,
+            'lang': lang,
+            'is_rtl': lang == 'ar_001',
         })
 
     @http.route(

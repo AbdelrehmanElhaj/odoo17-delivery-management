@@ -3,6 +3,7 @@
 
     <!--
         Driver portal: inject "My Deliveries" into the portal home.
+        Language is determined by the logged-in user's Odoo language preference.
     -->
     <template id="portal_my_home_delivery" name="Portal: Delivery entry"
               inherit_id="portal.portal_my_home" priority="40">
@@ -26,19 +27,26 @@
                 <t t-set="title">My Deliveries</t>
             </t>
 
-            <!-- PWA / Add-to-Home-Screen meta -->
             <t t-set="additional_title">My Deliveries</t>
 
-            <div class="container py-3">
-            <!-- Offline banner (shown by JS when navigator.onLine is false) -->
-            <div id="dms-offline-banner" class="alert alert-warning d-none mb-3">
-                <i class="fa fa-wifi me-2"/>You are offline. Stop actions will sync when connection is restored.
-            </div>
+            <!-- Detect RTL from user lang (ar_001 = rtl) -->
+            <t t-set="user_lang" t-value="request.env.lang if hasattr(request, 'env') else 'en_US'"/>
+            <t t-set="is_rtl" t-value="request.env.lang == 'ar_001'"/>
+
+            <div class="container py-3" t-att-dir="'rtl' if is_rtl else 'ltr'">
+
+                <!-- Offline banner -->
+                <div id="dms-offline-banner" class="alert alert-warning d-none mb-3">
+                    <i class="fa fa-wifi me-2"/>
+                    <t t-if="is_rtl">أنت غير متصل بالإنترنت. ستتزامن الإجراءات عند استعادة الاتصال.</t>
+                    <t t-else="">You are offline. Stop actions will sync when connection is restored.</t>
+                </div>
 
                 <t t-if="not trips">
                     <div class="alert alert-info">
                         <i class="fa fa-info-circle me-2"/>
-                        No active trips assigned to you today.
+                        <t t-if="is_rtl">لا توجد رحلات نشطة مخصصة لك اليوم.</t>
+                        <t t-else="">No active trips assigned to you today.</t>
                     </div>
                 </t>
 
@@ -49,8 +57,14 @@
                                 <i class="fa fa-road me-2"/>
                                 <t t-esc="trip.name"/>
                             </h5>
+                            <t t-set="state_labels_ar" t-value="{'draft': 'مسودة', 'dispatched': 'تم الإرسال', 'in_progress': 'قيد التنفيذ', 'done': 'مكتمل', 'cancelled': 'ملغى'}"/>
                             <span t-attf-class="badge bg-#{{'draft':'secondary','dispatched':'warning','in_progress':'info','done':'success'}.get(trip.state,'secondary')}">
-                                <t t-esc="dict(trip._fields['state'].selection).get(trip.state, trip.state)"/>
+                                <t t-if="is_rtl">
+                                    <t t-esc="state_labels_ar.get(trip.state, trip.state)"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="dict(trip._fields['state'].selection).get(trip.state, trip.state)"/>
+                                </t>
                             </span>
                         </div>
                         <div class="card-body p-0">
@@ -69,24 +83,29 @@
                                                     <t t-esc="stop.partner_id.street or ''"/>
                                                     <t t-if="stop.partner_id.city">, <t t-esc="stop.partner_id.city"/></t>
                                                 </div>
-                                                <!-- Navigate button (opens Google Maps / native maps) -->
+                                                <!-- Navigate button -->
                                                 <t t-if="stop.partner_lat and stop.partner_lng">
                                                     <a t-attf-href="https://maps.google.com/?q=#{stop.partner_lat},#{stop.partner_lng}"
                                                        target="_blank" rel="noopener"
                                                        class="btn btn-sm btn-outline-primary mt-1 dms-nav-btn">
-                                                        <i class="fa fa-location-arrow me-1"/>Navigate
+                                                        <i class="fa fa-location-arrow me-1"/>
+                                                        <t t-if="is_rtl">الملاحة</t><t t-else="">Navigate</t>
                                                     </a>
                                                 </t>
                                                 <t t-elif="stop.partner_id.street">
                                                     <a t-attf-href="https://maps.google.com/?q=#{stop.partner_id.street}+#{stop.partner_id.city or ''}"
                                                        target="_blank" rel="noopener"
                                                        class="btn btn-sm btn-outline-primary mt-1 dms-nav-btn">
-                                                        <i class="fa fa-location-arrow me-1"/>Navigate
+                                                        <i class="fa fa-location-arrow me-1"/>
+                                                        <t t-if="is_rtl">الملاحة</t><t t-else="">Navigate</t>
                                                     </a>
                                                 </t>
                                                 <div class="mt-1" t-if="stop.eta">
                                                     <i class="fa fa-clock-o me-1 text-muted"/>
-                                                    <span class="small">ETA: <t t-esc="stop.eta.strftime('%H:%M')"/></span>
+                                                    <span class="small">
+                                                        <t t-if="is_rtl">وقت الوصول: </t><t t-else="">ETA: </t>
+                                                        <t t-esc="stop.eta.strftime('%H:%M')"/>
+                                                    </span>
                                                 </div>
                                                 <div class="mt-1" t-if="stop.notes">
                                                     <i class="fa fa-sticky-note-o me-1 text-muted"/>
@@ -95,23 +114,32 @@
                                             </div>
                                             <!-- Status badge + actions -->
                                             <div class="dms-stop-actions ms-2 text-end">
+                                                <t t-set="stop_labels_ar" t-value="{'pending': 'معلق', 'arrived': 'وصل', 'done': 'مكتمل', 'failed': 'فاشل'}"/>
                                                 <span t-attf-class="badge bg-#{{'pending':'secondary','arrived':'warning','done':'success','failed':'danger'}.get(stop.status,'secondary')} mb-2 d-block">
-                                                    <t t-esc="dict(stop._fields['status'].selection).get(stop.status, stop.status)"/>
+                                                    <t t-if="is_rtl">
+                                                        <t t-esc="stop_labels_ar.get(stop.status, stop.status)"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <t t-esc="dict(stop._fields['status'].selection).get(stop.status, stop.status)"/>
+                                                    </t>
                                                 </span>
                                                 <t t-if="stop.status == 'pending'">
                                                     <a t-attf-href="/my/stop/#{stop.id}/arrive"
                                                        class="btn btn-sm btn-warning dms-stop-btn">
-                                                        <i class="fa fa-map-marker"/> Arrived
+                                                        <i class="fa fa-map-marker"/>
+                                                        <t t-if="is_rtl"> وصلت</t><t t-else=""> Arrived</t>
                                                     </a>
                                                 </t>
                                                 <t t-if="stop.status == 'arrived'">
                                                     <a t-attf-href="/my/stop/#{stop.id}/done"
                                                        class="btn btn-sm btn-success dms-stop-btn">
-                                                        <i class="fa fa-check"/> Done
+                                                        <i class="fa fa-check"/>
+                                                        <t t-if="is_rtl"> تم</t><t t-else=""> Done</t>
                                                     </a>
                                                     <a t-attf-href="/my/stop/#{stop.id}/failed"
                                                        class="btn btn-sm btn-danger dms-stop-btn mt-1">
-                                                        <i class="fa fa-times"/> Failed
+                                                        <i class="fa fa-times"/>
+                                                        <t t-if="is_rtl"> فشل</t><t t-else=""> Failed</t>
                                                     </a>
                                                     <!-- Photo upload form -->
                                                     <form t-attf-action="/my/stop/#{stop.id}/photo"
@@ -124,7 +152,8 @@
                                                                class="form-control form-control-sm mb-1"/>
                                                         <button type="submit"
                                                                 class="btn btn-sm btn-outline-secondary w-100">
-                                                            <i class="fa fa-camera"/> Upload Photo
+                                                            <i class="fa fa-camera"/>
+                                                            <t t-if="is_rtl"> رفع صورة</t><t t-else=""> Upload Photo</t>
                                                         </button>
                                                     </form>
                                                 </t>
@@ -135,10 +164,14 @@
                             </ul>
                         </div>
                         <div class="card-footer text-muted small d-flex justify-content-between">
-                            <span><i class="fa fa-truck me-1"/>
+                            <span>
+                                <i class="fa fa-truck me-1"/>
                                 <t t-esc="trip.vehicle_id.name"/> (<t t-esc="trip.vehicle_id.plate"/>)
                             </span>
-                            <span><t t-esc="trip.pending_stop_count"/>/<t t-esc="trip.stop_count"/> stops remaining</span>
+                            <span>
+                                <t t-esc="trip.pending_stop_count"/>/<t t-esc="trip.stop_count"/>
+                                <t t-if="is_rtl"> محطات متبقية</t><t t-else=""> stops remaining</t>
+                            </span>
                         </div>
                     </div>
                 </t>

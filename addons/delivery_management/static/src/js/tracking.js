@@ -88,10 +88,14 @@
         if (!badge) return;
         if (live) {
             badge.className = 'dms-gps-badge badge bg-success live';
-            badge.innerHTML = '<i class="fa fa-circle"></i> Live';
+            badge.innerHTML = DMS.isRtl
+                ? '<i class="fa fa-circle"></i> مباشر'
+                : '<i class="fa fa-circle"></i> Live';
         } else {
             badge.className = 'dms-gps-badge badge bg-secondary';
-            badge.innerHTML = '<i class="fa fa-circle-o"></i> Awaiting signal';
+            badge.innerHTML = DMS.isRtl
+                ? '<i class="fa fa-circle-o"></i> في انتظار الإشارة'
+                : '<i class="fa fa-circle-o"></i> Awaiting signal';
         }
     }
 
@@ -105,7 +109,10 @@
 
     function updateStopsRemaining(count) {
         const el = document.getElementById('dms-stops-remaining');
-        if (el) el.textContent = `${count} stop(s) remaining`;
+        if (!el) return;
+        el.textContent = DMS.isRtl
+            ? `${count} محطة متبقية`
+            : `${count} stop(s) remaining`;
     }
 
     function updateLastUpdated(isoString) {

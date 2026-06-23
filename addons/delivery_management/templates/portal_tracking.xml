@@ -4,13 +4,26 @@
     <!--
         Public customer tracking page — no login required.
         Route: /delivery/track/<token>
+        Supports Arabic (default) and English via ?lang=ar_001 / ?lang=en_US
     -->
     <template id="portal_tracking" name="Delivery Tracking Page">
         <t t-call="portal.frontend_layout">
-            <t t-set="additional_title"><t t-esc="order.name"/> — Track Your Delivery</t>
+            <t t-set="additional_title"><t t-esc="order.name"/> — <t t-if="is_rtl">تتبع توصيلتك</t><t t-else="">Track Your Delivery</t></t>
 
-            <div class="o_portal_wrap">
+            <div class="o_portal_wrap" t-att-dir="'rtl' if is_rtl else 'ltr'">
                 <div class="container py-4">
+
+                    <!-- Language toggle -->
+                    <div t-att-class="'text-start mb-3' if is_rtl else 'text-end mb-3'">
+                        <a t-attf-href="/delivery/track/#{order.tracking_token}?lang=ar_001"
+                           t-attf-class="btn btn-sm #{'btn-primary' if is_rtl else 'btn-outline-secondary'} me-1">
+                            العربية
+                        </a>
+                        <a t-attf-href="/delivery/track/#{order.tracking_token}?lang=en_US"
+                           t-attf-class="btn btn-sm #{'btn-primary' if not is_rtl else 'btn-outline-secondary'}">
+                            English
+                        </a>
+                    </div>
 
                     <!-- Header -->
                     <div class="row mb-4">
@@ -20,15 +33,26 @@
                                 <t t-esc="order.name"/>
                             </h2>
                             <p class="text-muted mb-0">
-                                <t t-if="order.mode == 'delivery'">Delivery</t>
-                                <t t-else="">Pickup</t>
-                                for <strong><t t-esc="order.partner_id.name"/></strong>
+                                <t t-if="order.mode == 'delivery'">
+                                    <t t-if="is_rtl">توصيل</t><t t-else="">Delivery</t>
+                                </t>
+                                <t t-else="">
+                                    <t t-if="is_rtl">استلام</t><t t-else="">Pickup</t>
+                                </t>
+                                <t t-if="is_rtl"> لـ </t><t t-else=""> for </t>
+                                <strong><t t-esc="order.partner_id.name"/></strong>
                             </p>
                         </div>
-                        <div class="col-auto text-end">
+                        <div t-att-class="'col-auto text-start' if is_rtl else 'col-auto text-end'">
                             <t t-set="state_class" t-value="{'draft': 'secondary', 'confirmed': 'warning', 'in_progress': 'info', 'done': 'success', 'failed': 'danger'}.get(order.state, 'secondary')"/>
+                            <t t-set="state_labels_ar" t-value="{'draft': 'مسودة', 'confirmed': 'مؤكد', 'in_progress': 'قيد التنفيذ', 'done': 'مكتمل', 'failed': 'فاشل'}"/>
                             <span t-attf-class="badge bg-#{state_class} fs-6 px-3 py-2">
-                                <t t-esc="dict(order._fields['state'].selection).get(order.state, order.state)"/>
+                                <t t-if="is_rtl">
+                                    <t t-esc="state_labels_ar.get(order.state, order.state)"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="dict(order._fields['state'].selection).get(order.state, order.state)"/>
+                                </t>
                             </span>
                         </div>
                     </div>
@@ -39,22 +63,26 @@
                         <div class="col-lg-7">
                             <div class="card dms-map-card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <span><i class="fa fa-map-marker me-1"/> Live Location</span>
+                                    <span>
+                                        <i class="fa fa-map-marker me-1"/>
+                                        <t t-if="is_rtl">الموقع المباشر</t><t t-else="">Live Location</t>
+                                    </span>
                                     <span class="dms-gps-badge badge bg-secondary" id="dms-gps-status">
-                                        <i class="fa fa-circle-o"/> Awaiting signal
+                                        <i class="fa fa-circle-o"/>
+                                        <t t-if="is_rtl"> في انتظار الإشارة</t><t t-else=""> Awaiting signal</t>
                                     </span>
                                 </div>
                                 <div class="card-body p-0">
                                     <div id="dms-map-container" class="dms-map-placeholder">
                                         <t t-if="vehicle and vehicle.last_lat and vehicle.last_lng">
-                                            <!-- Map renders via tracking.js using coordinates from poll endpoint -->
                                             <div id="dms-map" style="width:100%;height:350px;"/>
                                         </t>
                                         <t t-else="">
                                             <div class="dms-map-offline">
                                                 <i class="fa fa-map fa-3x text-muted mb-3"/>
                                                 <p class="text-muted">
-                                                    Live map will appear once the driver is en route.
+                                                    <t t-if="is_rtl">ستظهر الخريطة المباشرة بمجرد بدء السائق بالتوصيل.</t>
+                                                    <t t-else="">Live map will appear once the driver is en route.</t>
                                                 </p>
                                             </div>
                                         </t>
@@ -62,10 +90,12 @@
                                 </div>
                                 <div class="card-footer text-muted small" id="dms-last-updated">
                                     <t t-if="vehicle and vehicle.gps_updated">
-                                        Last updated:
+                                        <t t-if="is_rtl">آخر تحديث: </t><t t-else="">Last updated: </t>
                                         <span id="dms-updated-time"><t t-esc="vehicle.gps_updated"/></span>
                                     </t>
-                                    <t t-else="">GPS not yet available</t>
+                                    <t t-else="">
+                                        <t t-if="is_rtl">موقع GPS غير متاح بعد</t><t t-else="">GPS not yet available</t>
+                                    </t>
                                 </div>
                             </div>
                         </div>
@@ -76,7 +106,9 @@
                             <!-- ETA card -->
                             <div class="card mb-3" id="dms-eta-card" t-att-style="'display:none' if not next_stop else ''">
                                 <div class="card-body text-center">
-                                    <div class="text-muted small mb-1">Estimated Arrival</div>
+                                    <div class="text-muted small mb-1">
+                                        <t t-if="is_rtl">وقت الوصول المتوقع</t><t t-else="">Estimated Arrival</t>
+                                    </div>
                                     <div class="dms-eta-time" id="dms-eta-display">
                                         <t t-if="next_stop and next_stop.eta">
                                             <t t-esc="next_stop.eta.strftime('%H:%M')"/>
@@ -85,7 +117,8 @@
                                     </div>
                                     <div class="text-muted small" id="dms-stops-remaining">
                                         <t t-if="stops_remaining is not False">
-                                            <t t-esc="stops_remaining"/> stop(s) remaining
+                                            <t t-esc="stops_remaining"/>
+                                            <t t-if="is_rtl"> محطة متبقية</t><t t-else=""> stop(s) remaining</t>
                                         </t>
                                     </div>
                                 </div>
@@ -94,41 +127,50 @@
                             <!-- Milestones -->
                             <div class="card mb-3">
                                 <div class="card-header">
-                                    <i class="fa fa-flag-checkered me-1"/> Delivery Status
+                                    <i class="fa fa-flag-checkered me-1"/>
+                                    <t t-if="is_rtl">حالة التوصيل</t><t t-else="">Delivery Status</t>
                                 </div>
                                 <div class="card-body p-0">
                                     <ul class="list-group list-group-flush dms-milestones">
                                         <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state in ['draft'] else 'dms-milestone-done'}">
                                             <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state not in ['draft'] else 'fa-circle-o text-muted')}"/>
-                                            <span>Order Confirmed</span>
+                                            <t t-if="is_rtl">تم تأكيد الطلب</t><t t-else="">Order Confirmed</t>
                                         </li>
                                         <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state not in ['in_progress', 'done'] else 'dms-milestone-done'}">
                                             <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state in ['in_progress', 'done'] else 'fa-circle-o text-muted')}"/>
-                                            <span>Driver En Route</span>
+                                            <t t-if="is_rtl">السائق في الطريق</t><t t-else="">Driver En Route</t>
                                         </li>
                                         <li t-attf-class="list-group-item d-flex align-items-center #{'' if order.state != 'done' else 'dms-milestone-done'}">
                                             <i t-attf-class="fa me-3 #{('fa-check-circle text-success' if order.state == 'done' else ('fa-times-circle text-danger' if order.state == 'failed' else 'fa-circle-o text-muted'))}"/>
-                                            <span>
-                                                <t t-if="order.state == 'done'">Delivered</t>
-                                                <t t-elif="order.state == 'failed'">Delivery Attempted</t>
-                                                <t t-else="">Delivered</t>
-                                            </span>
+                                            <t t-if="order.state == 'done'">
+                                                <t t-if="is_rtl">تم التوصيل</t><t t-else="">Delivered</t>
+                                            </t>
+                                            <t t-elif="order.state == 'failed'">
+                                                <t t-if="is_rtl">تمت محاولة التوصيل</t><t t-else="">Delivery Attempted</t>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-if="is_rtl">التوصيل</t><t t-else="">Delivered</t>
+                                            </t>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <!-- Scheduled date -->
+                            <!-- Scheduled date / vehicle info -->
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row text-center">
                                         <div class="col border-end" t-if="order.scheduled_date">
-                                            <div class="text-muted small">Scheduled</div>
+                                            <div class="text-muted small">
+                                                <t t-if="is_rtl">موعد مجدول</t><t t-else="">Scheduled</t>
+                                            </div>
                                             <strong><t t-esc="order.scheduled_date.strftime('%d %b %Y')"/></strong>
                                             <div><t t-esc="order.scheduled_date.strftime('%H:%M')"/></div>
                                         </div>
                                         <div class="col" t-if="order.trip_id and order.trip_id.vehicle_id">
-                                            <div class="text-muted small">Vehicle</div>
+                                            <div class="text-muted small">
+                                                <t t-if="is_rtl">المركبة</t><t t-else="">Vehicle</t>
+                                            </div>
                                             <strong><t t-esc="order.trip_id.vehicle_id.plate"/></strong>
                                             <div class="text-muted small"><t t-esc="order.trip_id.vehicle_id.name"/></div>
                                         </div>
@@ -150,6 +192,7 @@
                     state: "<t t-esc='order.state'/>",
                     lat: <t t-esc="vehicle.last_lat if vehicle and vehicle.last_lat else 'null'"/>,
                     lng: <t t-esc="vehicle.last_lng if vehicle and vehicle.last_lng else 'null'"/>,
+                    isRtl: <t t-esc="'true' if is_rtl else 'false'"/>,
                 };
             </script>
         </t>
@@ -158,12 +201,20 @@
     <!-- 404-style page for invalid tokens -->
     <template id="portal_tracking_not_found" name="Delivery Tracking — Not Found">
         <t t-call="portal.frontend_layout">
-            <div class="o_portal_wrap">
+            <div class="o_portal_wrap" t-att-dir="'rtl' if is_rtl else 'ltr'">
                 <div class="container py-5 text-center">
                     <i class="fa fa-question-circle fa-4x text-muted mb-3"/>
-                    <h3>Tracking link not found</h3>
+                    <h3>
+                        <t t-if="is_rtl">رابط التتبع غير موجود</t>
+                        <t t-else="">Tracking link not found</t>
+                    </h3>
                     <p class="text-muted">
-                        This tracking link may be expired or incorrect. Please check the link in your confirmation message.
+                        <t t-if="is_rtl">
+                            قد يكون رابط التتبع منتهي الصلاحية أو غير صحيح. يرجى التحقق من الرابط في رسالة التأكيد.
+                        </t>
+                        <t t-else="">
+                            This tracking link may be expired or incorrect. Please check the link in your confirmation message.
+                        </t>
                     </p>
                 </div>
             </div>

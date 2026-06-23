@@ -1,0 +1,311 @@
+# Arabic translation for Odoo module delivery_management
+# Copyright (C) 2024 PropTech SA
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Last-Translator: PropTech SA\n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_vehicle
+msgid "Delivery Vehicle"
+msgstr "مركبة التوصيل"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_driver
+msgid "Delivery Driver"
+msgstr "سائق التوصيل"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_order
+msgid "Delivery Order"
+msgstr "طلب التوصيل"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_trip
+msgid "Delivery Trip"
+msgstr "رحلة التوصيل"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_stop
+msgid "Delivery Stop"
+msgstr "محطة التوصيل"
+
+#. module: delivery_management
+#: model:ir.model,name:delivery_management.model_delivery_photo
+msgid "Delivery Photo (Proof of Delivery)"
+msgstr "صورة إثبات التوصيل"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_root
+msgid "Delivery"
+msgstr "التوصيل"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_dashboard
+msgid "Live Map"
+msgstr "الخريطة المباشرة"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_dispatch
+msgid "Dispatch"
+msgstr "الإرسال"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_trips
+msgid "Trips"
+msgstr "الرحلات"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_orders
+msgid "Delivery Orders"
+msgstr "طلبات التوصيل"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_config
+msgid "Configuration"
+msgstr "الإعدادات"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_vehicles
+msgid "Vehicles"
+msgstr "المركبات"
+
+#. module: delivery_management
+#: model:ir.ui.menu,name:delivery_management.menu_delivery_drivers
+msgid "Drivers"
+msgstr "السائقون"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__plate
+msgid "License Plate"
+msgstr "لوحة الترخيص"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__capacity
+msgid "Capacity (kg)"
+msgstr "السعة (كجم)"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__traccar_device_id
+msgid "Traccar Device ID"
+msgstr "معرف جهاز تراكار"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__gps_updated
+msgid "GPS Last Updated"
+msgstr "آخر تحديث GPS"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__active_trip_id
+msgid "Active Trip"
+msgstr "الرحلة النشطة"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__name
+msgid "Reference"
+msgstr "المرجع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__sale_order_id
+msgid "Sales Order"
+msgstr "أمر البيع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__partner_id
+msgid "Customer"
+msgstr "العميل"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__scheduled_date
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__scheduled_date
+msgid "Scheduled Date"
+msgstr "التاريخ المجدول"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__trip_id
+msgid "Trip"
+msgstr "الرحلة"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__state
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__state
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__status
+msgid "Status"
+msgstr "الحالة"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__tracking_token
+msgid "Tracking Token"
+msgstr "رمز التتبع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__portal_url
+msgid "Tracking URL"
+msgstr "رابط التتبع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__next_stop_id
+msgid "Next Stop"
+msgstr "المحطة التالية"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__mode
+msgid "Mode"
+msgstr "النوع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__notes
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__notes
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__notes
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_photo__notes
+msgid "Notes"
+msgstr "ملاحظات"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__stop_ids
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__stop_ids
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__stop_count
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__stop_count
+msgid "Stops"
+msgstr "المحطات"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__pending_stop_count
+msgid "Pending Stops"
+msgstr "المحطات المعلقة"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__vehicle_id
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_driver__vehicle_id
+msgid "Vehicle"
+msgstr "المركبة"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__driver_id
+msgid "Driver"
+msgstr "السائق"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__actual_start
+msgid "Actual Start"
+msgstr "وقت البدء الفعلي"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_trip__actual_end
+msgid "Actual End"
+msgstr "وقت الانتهاء الفعلي"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__partner_id
+msgid "Delivery Address"
+msgstr "عنوان التوصيل"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__eta
+msgid "ETA"
+msgstr "وقت الوصول المتوقع"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__actual_arrival
+msgid "Actual Arrival"
+msgstr "وقت الوصول الفعلي"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__photo_ids
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__photo_count
+msgid "Photos"
+msgstr "الصور"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__last_lat
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__partner_lat
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__partner_lat
+msgid "Latitude"
+msgstr "خط العرض"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_vehicle__last_lng
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_order__partner_lng
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_stop__partner_lng
+msgid "Longitude"
+msgstr "خط الطول"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_driver__phone
+msgid "Phone"
+msgstr "الهاتف"
+
+#. module: delivery_management
+#: model:ir.model.fields,field_description:delivery_management.field_delivery_driver__user_id
+msgid "User"
+msgstr "المستخدم"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__mode__delivery
+msgid "Delivery"
+msgstr "توصيل"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__mode__pickup
+msgid "Pickup"
+msgstr "استلام"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__state__draft
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_trip__state__draft
+msgid "Draft"
+msgstr "مسودة"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__state__confirmed
+msgid "Confirmed"
+msgstr "مؤكد"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__state__in_progress
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_trip__state__in_progress
+msgid "In Progress"
+msgstr "قيد التنفيذ"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__state__done
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_trip__state__done
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_stop__status__done
+msgid "Done"
+msgstr "مكتمل"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_order__state__failed
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_stop__status__failed
+msgid "Failed"
+msgstr "فاشل"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_trip__state__dispatched
+msgid "Dispatched"
+msgstr "تم الإرسال"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_trip__state__cancelled
+msgid "Cancelled"
+msgstr "ملغى"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_stop__status__pending
+msgid "Pending"
+msgstr "معلق"
+
+#. module: delivery_management
+#: model:ir.model.fields.selection,name:delivery_management.selection__delivery_stop__status__arrived
+msgid "Arrived"
+msgstr "وصل"

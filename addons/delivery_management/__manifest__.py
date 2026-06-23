@@ -1,6 +1,6 @@
 {
     'name': 'Delivery Management',
-    'version': '17.0.2.0.0',
+    'version': '17.0.3.0.0',
     'category': 'Operations/Inventory',
     'summary': 'Truck dispatch, GPS tracking, and proof-of-delivery for Odoo 17',
     'author': 'Abdelrehman Elhaj',
